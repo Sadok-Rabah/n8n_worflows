@@ -1,0 +1,168 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -256,
+        0
+      ],
+      "id": "06e06aa3-186b-4f09-a837-5e8cd717609f",
+      "name": "Telegram Trigger",
+      "webhookId": "bf20f128-dced-477c-9308-a55dd4a9014b",
+      "credentials": {
+        "telegramApi": {
+          "id": "3BVKODiGMJhmJftn",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=you'll get a picture of meal, please calculate proteines, calories and carbs in a short paragraph. if it's not a meal say \"please send a meal\"",
+        "options": {
+          "passthroughBinaryImages": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        16,
+        208
+      ],
+      "id": "41d22038-189f-4dc7-90bd-cfd8daa0f937",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        352
+      ],
+      "id": "0352a449-89e8-429e-a566-64fbd5ac553c",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "KnOVBbeil4cwV65V",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.photo[0].file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "1730d817-849c-4616-80f9-041c91f83abd",
+      "name": "Get a file",
+      "webhookId": "b7e5f2d7-7554-4b1d-84e3-ba96fd4a6df3",
+      "credentials": {
+        "telegramApi": {
+          "id": "3BVKODiGMJhmJftn",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        336,
+        208
+      ],
+      "id": "d261f9ad-afb4-44a4-9577-411f272d7aae",
+      "name": "Send a text message",
+      "webhookId": "36cd4e7c-e930-4cd6-b7e8-8c0684b500ef",
+      "credentials": {
+        "telegramApi": {
+          "id": "3BVKODiGMJhmJftn",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "a6b55bde-06d7-45e8-84e3-232d24d9404d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "17dd1dbdb6b8e8580564fa6ee321a6c223a6cb3b31b8fe6fa3125560e8642ada"
+  },
+  "id": "N2WpR7wetdZshrQW",
+  "tags": []
+}
